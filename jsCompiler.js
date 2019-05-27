@@ -1,5 +1,6 @@
 'use strict';
 
+// lexical tokenizer
 function tokenizer(input) {
 
   let current = 0;
@@ -32,11 +33,15 @@ function tokenizer(input) {
       continue;
     }
 
+    // Regex
+
     let WHITESPACE = /\s/;
     if (WHITESPACE.test(char)) {
       current++;
       continue;
     }
+
+    // Regex
 
     let NUMBERS = /[0-9]/;
     if (NUMBERS.test(char)) {
@@ -75,6 +80,8 @@ function tokenizer(input) {
 
       continue;
     }
+
+    // Regex
 
     let LETTERS = /[a-zA-Z]/i;
     if (LETTERS.test(char)) {
