@@ -1,0 +1,11 @@
+{
+  "name": "tedexx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "jsCompiler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hizqeel Raza <hizqeel@gmail.com>",
+  "license": "CC-BY-4.0"
+}
