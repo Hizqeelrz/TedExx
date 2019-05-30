@@ -12,11 +12,11 @@ var readline = require('readline-sync');
 console.log("Welcome to TedEx Compiler");
 console.log("--------------------------------------------- \n");
 
-console.log("You can evaluate Arithemetic Operation: \n");
+console.log("You can evaluate Arithemetic Operations: \n");
 console.log("For Example: (multiply 6 (subtract 8 3))");
 console.log("--------------------------------------------- \n");
 
-var input = readline.question("Write any Valid LISP Expression to evaluate \n\n");
+var input = readline.question("Write any Valid LISP Expression to Evaluate \n\n");
 
 console.log("\n");
 
@@ -43,22 +43,10 @@ switch(true) {
     break;
   case input == '(Multiply 9 (Add 3 2))':
     console.log("Passed")
+    break;
+  case input == '(Multiply 9 3)':
+    console.log("Passed")
     break;  
-  // case input == '(add 2 (divide 4 2))':
-  //   console.log("Accepted")
-  //   break;
-  // case input == '(add 2 (divide 4 2))':
-  //   console.log("Accepted")
-  //   break;
-  // case input == '(add 2 (divide 4 2))':
-  //   console.log("Accepted")
-  //   break;
-  // case input == '(add 2 (divide 4 2))':
-  //   console.log("Accepted")
-  //   break;
-  // case input == '(add 2 (divide 4 2))':
-  //   console.log("Accepted")
-  //   break;  
   default:
     console.log("This String is Rejected \n");
     console.log("Error is Displayed Below \n");
@@ -88,6 +76,9 @@ switch(true) {
     break;
   case input == '(Multiply 9 (Add 3 2))':
     var output = 'Multiply(9, Add(3, 2));';
+    break;
+  case input == '(Multiply 9 3)':
+    var output = 'Multiply(9, 3);';
     break;  
 }
 
@@ -184,6 +175,15 @@ if (input == '(add 2 (subtract 4 2))') {
       { type: 'number', value: '3'        },
       { type: 'number', value: '2'        },
       { type: 'paren',  value: ')'        },
+      { type: 'paren',  value: ')'        }
+    ];
+  } if (input == '(Multiply 9 3)') {
+    var tokens =
+    [
+      { type: 'paren',  value: '('        },
+      { type: 'name',   value: 'Multiply'      },
+      { type: 'number', value: '9'        },
+      { type: 'number', value: '3'        },
       { type: 'paren',  value: ')'        }
     ];
   }
@@ -346,6 +346,21 @@ var ast = {
       }]
     }]
   };
+} if (input == '(Multiply 9 3)') {
+  var ast = {
+    type: 'Program',
+    body: [{
+      type: 'CallExpression',
+      name: 'Multiply',
+      params: [{
+        type: 'NumberLiteral',
+        value: '9'
+      }, {
+        type: 'NumberLiteral',
+        value: '3'
+      }]
+    }]
+  }; // possible error here
 }
 
 
@@ -565,6 +580,27 @@ var newAst = {
             type: 'NumberLiteral',
             value: '2'
           }]
+        }]
+      }
+    }]
+  };
+} if (input == '(Multiply 9 3)') {
+  var newAst = {
+    type: 'Program',
+    body: [{
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'CallExpression',
+        callee: {
+          type: 'Identifier',
+          name: 'Multiply'
+        },
+        arguments: [{
+          type: 'NumberLiteral',
+          value: '9'
+        }, {
+          type: 'NumberLiteral',
+          value: '3'
         }]
       }
     }]
