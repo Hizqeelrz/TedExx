@@ -3,14 +3,26 @@
 // lexical tokenizer
 function tokenizer(input) {
 
+  // Regex for Validation
+
+  let WHITESPACE = /\s/;
+  let NUMBERS = /[0-9]/;
+  let LETTERS = /[a-zA-Z]/i;
+
+
+  // A current variable used to track the position just like cursor
   let current = 0;
 
+  // array for pushing our tokens IN
   let tokens = [];
+
+  // our tokens length can be unkown so we have to increment as much as possible
 
   while (current < input.length) {
 
     let char = input[current];
 
+    // to check if we have an open parenthises
 
     if (char === '(') {
 
@@ -21,6 +33,7 @@ function tokenizer(input) {
 
       current++;
 
+      // continue is for next cycle of loop
       continue;
     }
 
@@ -33,25 +46,27 @@ function tokenizer(input) {
       continue;
     }
 
-    // Regex
+    // Regex is described above i.e /\s/ which shows that the whitespace if exist than continue 
 
-    let WHITESPACE = /\s/;
     if (WHITESPACE.test(char)) {
       current++;
       continue;
     }
 
-    // Regex
+    // Numbers are captured in a sequence as it can be of any number of character
 
-    let NUMBERS = /[0-9]/;
     if (NUMBERS.test(char)) {
 
+      // value variable (String) so store/push characters into it 
       let value = '';
 
+      // loop through each number until a character is found i.e not a number
       while (NUMBERS.test(char)) {
         value += char;
         char = input[++current];
       }
+
+      // push number token to tokens array
 
       tokens.push({ type: 'number', value });
 
@@ -59,6 +74,7 @@ function tokenizer(input) {
       continue;
     }
 
+    // String for double quote
     if (char === '"') {
 
       let value = '';
@@ -66,7 +82,7 @@ function tokenizer(input) {
 
       char = input[++current];
 
-
+      // iterate through character until next double qoute is found
       while (char !== '"') {
         value += char;
         char = input[++current];
@@ -75,15 +91,12 @@ function tokenizer(input) {
       // Skip the closing double quote.
       char = input[++current];
 
-      // And add our `string` token to the `tokens` array.
+      // add our `string` token to the `tokens` array.
       tokens.push({ type: 'string', value });
 
       continue;
     }
 
-    // Regex
-
-    let LETTERS = /[a-zA-Z]/i;
     if (LETTERS.test(char)) {
       let value = '';
 
@@ -100,36 +113,43 @@ function tokenizer(input) {
       continue;
     }
 
-    // Finally if we have not matched a character by now, we're going to throw
+    // if we have not matched a character by now, we're going to throw
     // an error and completely exit.
     throw new TypeError('I dont know what this character is: ' + char);
   }
 
-  // Then at the end of our `tokenizer` we simply return the tokens array.
+  // At the end of our `tokenizer` we simply return the tokens array.
   return tokens;
 }
 
-// parser
-
+// PARSER for tokens to convert it into Ast
+// accepting array of tokens
 function parser(tokens) {
 
   let current = 0;
 
+  // using recursion instead of while loop. walk() is defined (it can any function name)
+
   function walk() {
 
+    // grabbing the current token
     let token = tokens[current];
+
+    // we check if we have number token 
 
     if (token.type === 'number') {
 
-      // If we have one, we'll increment `current`.
+      // If we have one, we will increment current.
       current++;
 
+      // newAst is returned i.e NumberLiteral, setting its value to our token 
       return {
         type: 'NumberLiteral',
         value: token.value,
       };
     }
 
+    // same like above and a StringLiteral is created
     if (token.type === 'string') {
       current++;
 
@@ -139,12 +159,16 @@ function parser(tokens) {
       };
     }
 
+    // if an open parenthesis is detected. CallExpression is called
     if (
       token.type === 'paren' &&
       token.value === '('
     ) {
 
+      // open paren is skipped through our current increment, as we dont need it in our AST
       token = tokens[++current];
+
+      // base node with type CallExpression, as we will set the name of the current token value
 
       let node = {
         type: 'CallExpression',
@@ -152,6 +176,7 @@ function parser(tokens) {
         params: [],
       };
 
+      // current is incremented, to skip the name token
       token = tokens[++current];
 
       while (
@@ -164,7 +189,7 @@ function parser(tokens) {
         token = tokens[current];
       }
 
-      // Finally we will increment `current` one last time to skip the closing
+      // We will increment `current` one last time to skip the closing
       // parenthesis.
       current++;
 
@@ -174,7 +199,7 @@ function parser(tokens) {
 
     // Again, if we haven't recognized the token type by now we're going to
     // throw an error.
-    throw new TypeError(token.type);
+    throw new TypeError("Unable to recognize this " + token.type);
   }
 
   // Now, we're going to create our AST which will have a root which is a
@@ -184,6 +209,10 @@ function parser(tokens) {
     body: [],
   };
 
+  // this is done inside a loop bcz we can have Expression inside a nested loop
+  // (divide 10 2)
+  // (multiply 5 9)
+
   while (current < tokens.length) {
     ast.body.push(walk());
   }
@@ -191,20 +220,23 @@ function parser(tokens) {
   return ast;
 }
 
-
+// accepts previous ast and the visitor 
 function traverser(ast, visitor) {
 
+  // it will allow us to iterate over an Array and call the next traverseNode funtion
   function traverseArray(array, parent) {
     array.forEach(child => {
       traverseNode(child, parent);
     });
   }
 
+  // accepts the current node and the parent node and return the value to the methods
   function traverseNode(node, parent) {
 
+    // it will check for an exitence of a method with a visitor matching type
     let methods = visitor[node.type];
 
-
+    // enter is the any type which is entered stored in the `methods`
     if (methods && methods.enter) {
       methods.enter(node, parent);
     }
@@ -212,6 +244,8 @@ function traverser(ast, visitor) {
     // Next we are going to split things up by the current node type.
     switch (node.type) {
 
+      // program will have array of nodes and it is at the top level program
+      // traverseArray will call the traverseNode in return which will create recursive call
       case 'Program':
         traverseArray(node.body, node);
         break;
@@ -220,6 +254,7 @@ function traverser(ast, visitor) {
         traverseArray(node.params, node);
         break;
 
+      // no need for the child nodes to visit so we will break
       case 'NumberLiteral':
       case 'StringLiteral':
         break;
@@ -251,6 +286,8 @@ function transformer(ast) {
     body: [],
   };
 
+  // to keep things simple, a Context property is created on our parent nodes that we will push nodes to parents context
+  // In simple words, it is reference from old `ast` to `new` ast
   ast._context = newAst.body;
 
   // We'll start by calling the traverser function with our ast and a visitor.
@@ -293,17 +330,20 @@ function transformer(ast) {
           arguments: [],
         };
 
+        // to push arguments
         node._context = expression.arguments;
 
         if (parent.type !== 'CallExpression') {
 
+          // we are wrapping CallExpression into ExpressionStatement bcz due to top level Javascript
+          // CallExpresiion is Statements 
           expression = {
             type: 'ExpressionStatement',
             expression: expression,
           };
         }
 
-        // Last, we push our (possibly wrapped) `CallExpression` to the `parent`'s
+        // push our (possibly wrapped) `CallExpression` to the `parent`'s
         // `context`.
         parent._context.push(expression);
       },
@@ -329,6 +369,9 @@ function codeGenerator(node) {
         ';' // << (...because we like to code the *correct* way)
       );
 
+    // for CallExpression we will call callee, we will map through each node and run through code generator 
+    // joining with comma and then adding closing parenthesis
+
     case 'CallExpression':
       return (
         codeGenerator(node.callee) +
@@ -352,7 +395,7 @@ function codeGenerator(node) {
 
     // And if we haven't recognized the node, we'll throw an error.
     default:
-      throw new TypeError(node.type);
+      throw new TypeError("Unable to recognize this" + node.type);
   }
 }
 
@@ -368,7 +411,7 @@ function compiler(input) {
 }
 
 
-// Now I'm just exporting everything...
+// Now just export everything...
 module.exports = {
   tokenizer,
   parser,

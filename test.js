@@ -349,7 +349,7 @@ var ast = {
 }
 
 
-// ----------------------- NEWAST PARSER TRANSFORMATION ----------------------- //
+// ----------------------- NEW-AST PARSER TRANSFORMATION ----------------------- //
 
 if (input == '(add 2 (subtract 4 2))') {
 var newAst = {
