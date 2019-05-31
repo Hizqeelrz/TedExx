@@ -1,5 +1,20 @@
 'use strict';
 
+
+// We're Compiling lisp function calls into C function calls
+//
+// A quick intro --------------------------->
+//
+// If we had two functions i.e add and subtract they would be written like this:
+//
+//                  LISP                      C
+//
+//   2 + 2          (add 2 2)                 add(2, 2)
+//   4 - 2          (subtract 4 2)            subtract(4, 2)
+//   2 + (4 - 2)    (add 2 (subtract 4 2))    add(2, subtract(4, 2))
+
+
+
 // lexical tokenizer
 function tokenizer(input) {
 
